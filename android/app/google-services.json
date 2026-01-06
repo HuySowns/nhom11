@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "312223417322",
+    "firebase_url": "https://nhom11-d382b-default-rtdb.firebaseio.com",
+    "project_id": "nhom11-d382b",
+    "storage_bucket": "nhom11-d382b.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:312223417322:android:bc1f32f29cee323d9d2893",
+        "android_client_info": {
+          "package_name": "com.example.nhom11"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "312223417322-ol9hvajvgjvq5us9jbq7qe5ca80m3j7m.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCwDHBI79-oj64x6DjCQ5XiZqcyFhIg6nw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "312223417322-ol9hvajvgjvq5us9jbq7qe5ca80m3j7m.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "312223417322-pneikk9f7g3jgp8ectf747nfbl7rm95o.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.nhom11"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
