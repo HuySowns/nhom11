@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../services/auth_provider.dart';
-import '../services/firestore_service.dart';
+import '../services/realtime_service.dart';
 import '../models/favorite.dart';
 import '../models/booking.dart';
 import '../models/destination.dart';
@@ -15,9 +15,9 @@ class ProfileScreen extends StatefulWidget {
   _ProfileScreenState createState() => _ProfileScreenState();
 }
 
-class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProviderStateMixin {
+class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProviderStateMixin, WidgetsBindingObserver {
   late TabController _tabController;
-  final FirestoreService _firestoreService = FirestoreService();
+  final RealtimeService _realtimeService = RealtimeService();
 
   List<Favorite> _favorites = [];
   List<Booking> _bookings = [];
@@ -28,20 +28,39 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
+    WidgetsBinding.instance.addObserver(this);
     _loadData();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      _loadData();
+    }
   }
 
   Future<void> _loadData() async {
     final user = context.read<AuthProvider>().user;
-    if (user == null) return;
+    if (user == null) {
+      setState(() => _isLoading = false);
+      return;
+    }
 
     try {
-      _favorites = await _firestoreService.getUserFavorites(user.uid);
-      _bookings = await _firestoreService.getUserBookings(user.uid);
-      _destinations = await _firestoreService.getDestinations();
+      final favorites = await _realtimeService.getUserFavorites(user.uid);
+      final bookings = await _realtimeService.getUserBookings(user.uid);
+      final destinations = await _realtimeService.getDestinations();
+      
+      setState(() {
+        _favorites = favorites;
+        _bookings = bookings;
+        _destinations = destinations;
+        _isLoading = false;
+      });
+      
+      print('Loaded ${bookings.length} bookings for user ${user.uid}');
     } catch (e) {
       print('Error loading profile data: $e');
-    } finally {
       setState(() => _isLoading = false);
     }
   }
@@ -123,11 +142,14 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
             ],
           ),
           Expanded(
-            child: TabBarView(
-              children: [
-                _buildFavoritesList(),
-                _buildBookingsList(),
-              ],
+            child: RefreshIndicator(
+              onRefresh: _loadData,
+              child: TabBarView(
+                children: [
+                  _buildFavoritesList(),
+                  _buildBookingsList(),
+                ],
+              ),
             ),
           ),
         ],
@@ -201,6 +223,7 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
   @override
   void dispose() {
     _tabController.dispose();
+    WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
 }

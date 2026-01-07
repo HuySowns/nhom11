@@ -16,10 +16,10 @@ class Booking {
   factory Booking.fromMap(String id, Map<String, dynamic> data) {
     return Booking(
       id: id,
-      userId: data['userId'],
-      destinationId: data['destinationId'],
-      date: DateTime.parse(data['date']),
-      numPeople: data['numPeople'],
+      userId: data['userId'] as String,
+      destinationId: data['destinationId'] as String,
+      date: DateTime.parse(data['date'] as String),
+      numPeople: (data['numPeople'] as num).toInt(),
     );
   }
 

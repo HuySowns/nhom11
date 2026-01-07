@@ -20,12 +20,12 @@ class Destination {
   factory Destination.fromMap(String id, Map<String, dynamic> data) {
     return Destination(
       id: id,
-      name: data['name'],
-      location: data['location'],
-      description: data['description'],
-      price: data['price'].toDouble(),
-      rating: data['rating'].toDouble(),
-      imageUrls: List<String>.from(data['imageUrls']),
+      name: data['name'] as String,
+      location: data['location'] as String,
+      description: data['description'] as String,
+      price: (data['price'] as num).toDouble(),
+      rating: (data['rating'] as num).toDouble(),
+      imageUrls: (data['imageUrls'] as List<dynamic>?)?.cast<String>() ?? [],
     );
   }
 

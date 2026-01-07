@@ -12,8 +12,8 @@ class Favorite {
   factory Favorite.fromMap(String id, Map<String, dynamic> data) {
     return Favorite(
       id: id,
-      userId: data['userId'],
-      destinationId: data['destinationId'],
+      userId: data['userId'] as String,
+      destinationId: data['destinationId'] as String,
     );
   }
 

@@ -1,6 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:http/http.dart' as http;
+import 'dart:io';
+import 'dart:convert';
 import '../models/destination.dart';
-import '../services/firestore_service.dart';
+import '../services/destination_provider.dart';
+import '../services/auth_provider.dart';
 
 class AddDestinationScreen extends StatefulWidget {
   const AddDestinationScreen({super.key});
@@ -16,11 +22,59 @@ class _AddDestinationScreenState extends State<AddDestinationScreen> {
   final _descriptionController = TextEditingController();
   final _priceController = TextEditingController();
   final _ratingController = TextEditingController();
-  final _imageUrlsController = TextEditingController(); // Comma-separated URLs
+  List<File> _selectedImages = [];
   bool _isLoading = false;
+
+  final ImagePicker _picker = ImagePicker();
+
+  // Cloudinary config - Replace with your own
+  final String cloudName = 'dojmlppez'; // Thay bằng cloud name của bạn
+  final String uploadPreset = 'ej0fmspl'; // Thay bằng upload preset
+
+  Future<void> _pickImage(ImageSource source) async {
+    final XFile? image = await _picker.pickImage(source: source);
+    if (image != null) {
+      setState(() {
+        _selectedImages.add(File(image.path));
+      });
+    }
+  }
+
+  Future<String?> _uploadToCloudinary(File image) async {
+    print('Uploading to Cloudinary with cloudName: $cloudName, uploadPreset: $uploadPreset');
+    try {
+      final uri = Uri.parse('https://api.cloudinary.com/v1_1/$cloudName/image/upload');
+      final request = http.MultipartRequest('POST', uri)
+        ..fields['upload_preset'] = uploadPreset
+        ..files.add(await http.MultipartFile.fromPath('file', image.path));
+
+      final response = await request.send();
+      if (response.statusCode == 200) {
+        final responseData = await response.stream.bytesToString();
+        final json = jsonDecode(responseData);
+        return json['secure_url'];
+      } else {
+        print('Upload failed with status: ${response.statusCode}');
+        final responseBody = await response.stream.bytesToString();
+        print('Response body: $responseBody');
+      }
+    } catch (e) {
+      print('Upload failed: $e');
+    }
+    return null;
+  }
 
   @override
   Widget build(BuildContext context) {
+    final user = context.watch<AuthProvider>().user;
+    if (user == null || user.role != 'admin') {
+      return Scaffold(
+        appBar: AppBar(title: const Text('Access Denied')),
+        body: const Center(
+          child: Text('You do not have permission to add destinations.'),
+        ),
+      );
+    }
     return Scaffold(
       appBar: AppBar(title: const Text('Add Destination')),
       body: Padding(
@@ -64,14 +118,37 @@ class _AddDestinationScreenState extends State<AddDestinationScreen> {
                     return null;
                   },
                 ),
-                TextFormField(
-                  controller: _imageUrlsController,
-                  decoration: const InputDecoration(
-                    labelText: 'Image URLs (comma-separated)',
-                    hintText: 'https://example.com/image1.jpg, https://example.com/image2.jpg',
-                  ),
-                  maxLines: 2,
+                const SizedBox(height: 16),
+                const Text('Images', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                Row(
+                  children: [
+                    ElevatedButton.icon(
+                      onPressed: () => _pickImage(ImageSource.camera),
+                      icon: const Icon(Icons.camera),
+                      label: const Text('Camera'),
+                    ),
+                    const SizedBox(width: 10),
+                    ElevatedButton.icon(
+                      onPressed: () => _pickImage(ImageSource.gallery),
+                      icon: const Icon(Icons.photo),
+                      label: const Text('Gallery'),
+                    ),
+                  ],
                 ),
+                if (_selectedImages.isNotEmpty)
+                  SizedBox(
+                    height: 100,
+                    child: ListView.builder(
+                      scrollDirection: Axis.horizontal,
+                      itemCount: _selectedImages.length,
+                      itemBuilder: (context, index) {
+                        return Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Image.file(_selectedImages[index], width: 80, height: 80, fit: BoxFit.cover),
+                        );
+                      },
+                    ),
+                  ),
                 const SizedBox(height: 20),
                 _isLoading
                     ? const CircularProgressIndicator()
@@ -92,33 +169,54 @@ class _AddDestinationScreenState extends State<AddDestinationScreen> {
 
     setState(() => _isLoading = true);
     try {
-      final imageUrls = _imageUrlsController.text
-          .split(',')
-          .map((url) => url.trim())
-          .where((url) => url.isNotEmpty)
-          .toList();
+      double price;
+      double rating;
+      try {
+        price = double.parse(_priceController.text.trim());
+        rating = double.parse(_ratingController.text.trim());
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Invalid price or rating format')),
+        );
+        return;
+      }
+
+      // Upload selected images to Cloudinary
+      List<String> uploadedUrls = [];
+      for (var image in _selectedImages) {
+        final url = await _uploadToCloudinary(image);
+        if (url != null) {
+          uploadedUrls.add(url);
+        }
+      }
 
       final destination = Destination(
-        id: '', // Will be set by Firestore
+        id: '', // Will be set by Realtime DB
         name: _nameController.text.trim(),
         location: _locationController.text.trim(),
         description: _descriptionController.text.trim(),
-        price: double.parse(_priceController.text.trim()),
-        rating: double.parse(_ratingController.text.trim()),
-        imageUrls: imageUrls,
+        price: price,
+        rating: rating,
+        imageUrls: uploadedUrls,
       );
 
-      await FirestoreService().addDestination(destination);
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Destination added successfully!')),
-      );
-      Navigator.pop(context);
+      await context.read<DestinationProvider>().addDestination(destination);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Destination added successfully!')),
+        );
+        Navigator.pop(context);
+      }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to add destination: $e')),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to add destination: $e')),
+        );
+      }
     } finally {
-      setState(() => _isLoading = false);
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
     }
   }
 
@@ -129,7 +227,6 @@ class _AddDestinationScreenState extends State<AddDestinationScreen> {
     _descriptionController.dispose();
     _priceController.dispose();
     _ratingController.dispose();
-    _imageUrlsController.dispose();
     super.dispose();
   }
 }

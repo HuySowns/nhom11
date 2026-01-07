@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 import '../models/destination.dart';
 import '../models/booking.dart';
 import '../services/auth_provider.dart';
-import '../services/firestore_service.dart';
+import '../services/realtime_service.dart';
 
 class BookingScreen extends StatefulWidget {
   final Destination destination;
@@ -100,13 +100,13 @@ class _BookingScreenState extends State<BookingScreen> {
     setState(() => _isLoading = true);
     try {
       final booking = Booking(
-        id: '', // Will be set by Firestore
+        id: '', // Will be set by Realtime DB
         userId: user.uid,
         destinationId: widget.destination.id,
         date: _selectedDate,
         numPeople: _numPeople,
       );
-      await FirestoreService().addBooking(booking);
+      await RealtimeService().addBooking(booking);
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Booking confirmed!')),
       );

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../services/auth_provider.dart';
-import '../services/firestore_service.dart';
+import '../services/realtime_service.dart';
 import '../models/booking.dart';
 import '../models/destination.dart';
 import 'destination_detail_screen.dart';
@@ -13,8 +13,8 @@ class BookingsScreen extends StatefulWidget {
   _BookingsScreenState createState() => _BookingsScreenState();
 }
 
-class _BookingsScreenState extends State<BookingsScreen> {
-  final FirestoreService _firestoreService = FirestoreService();
+class _BookingsScreenState extends State<BookingsScreen> with WidgetsBindingObserver {
+  final RealtimeService _realtimeService = RealtimeService();
   List<Booking> _bookings = [];
   List<Destination> _destinations = [];
   bool _isLoading = true;
@@ -22,19 +22,37 @@ class _BookingsScreenState extends State<BookingsScreen> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _loadBookings();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      _loadBookings();
+    }
   }
 
   Future<void> _loadBookings() async {
     final user = context.read<AuthProvider>().user;
-    if (user == null) return;
+    if (user == null) {
+      setState(() => _isLoading = false);
+      return;
+    }
 
     try {
-      _bookings = await _firestoreService.getUserBookings(user.uid);
-      _destinations = await _firestoreService.getDestinations();
+      final bookings = await _realtimeService.getUserBookings(user.uid);
+      final destinations = await _realtimeService.getDestinations();
+      
+      setState(() {
+        _bookings = bookings;
+        _destinations = destinations;
+        _isLoading = false;
+      });
+      
+      print('Loaded ${bookings.length} bookings for user ${user.uid}');
     } catch (e) {
       print('Error loading bookings: $e');
-    } finally {
       setState(() => _isLoading = false);
     }
   }
@@ -151,5 +169,11 @@ class _BookingsScreenState extends State<BookingsScreen> {
                   ),
                 ),
     );
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
   }
 }

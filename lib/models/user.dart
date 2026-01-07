@@ -15,11 +15,11 @@ class AppUser {
 
   factory AppUser.fromMap(Map<String, dynamic> data) {
     return AppUser(
-      uid: data['uid'],
-      name: data['name'],
-      email: data['email'],
-      avatarUrl: data['avatarUrl'],
-      role: data['role'] ?? 'user',
+      uid: data['uid'] as String,
+      name: data['name'] as String,
+      email: data['email'] as String,
+      avatarUrl: data['avatarUrl'] as String?,
+      role: (data['role'] as String?) ?? 'user',
     );
   }
 
@@ -31,5 +31,21 @@ class AppUser {
       'avatarUrl': avatarUrl,
       'role': role,
     };
+  }
+
+  AppUser copyWith({
+    String? uid,
+    String? name,
+    String? email,
+    String? avatarUrl,
+    String? role,
+  }) {
+    return AppUser(
+      uid: uid ?? this.uid,
+      name: name ?? this.name,
+      email: email ?? this.email,
+      avatarUrl: avatarUrl ?? this.avatarUrl,
+      role: role ?? this.role,
+    );
   }
 }

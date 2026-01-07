@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 import '../models/destination.dart';
 import '../models/favorite.dart';
 import '../services/auth_provider.dart';
-import '../services/firestore_service.dart';
+import '../services/realtime_service.dart';
 
 class DestinationDetailScreen extends StatefulWidget {
   final Destination destination;
@@ -15,7 +15,7 @@ class DestinationDetailScreen extends StatefulWidget {
 }
 
 class _DestinationDetailScreenState extends State<DestinationDetailScreen> {
-  final FirestoreService _firestoreService = FirestoreService();
+  final RealtimeService _realtimeService = RealtimeService();
   bool _isFavorite = false;
   bool _isLoading = true;
 
@@ -28,7 +28,7 @@ class _DestinationDetailScreenState extends State<DestinationDetailScreen> {
   Future<void> _checkFavorite() async {
     final user = context.read<AuthProvider>().user;
     if (user != null) {
-      _isFavorite = await _firestoreService.isFavorite(user.uid, widget.destination.id);
+      _isFavorite = await _realtimeService.isFavorite(user.uid, widget.destination.id);
     }
     setState(() => _isLoading = false);
   }
@@ -41,24 +41,34 @@ class _DestinationDetailScreenState extends State<DestinationDetailScreen> {
     try {
       if (_isFavorite) {
         // Remove from favorites
-        final favorites = await _firestoreService.getUserFavorites(user.uid);
+        final favorites = await _realtimeService.getUserFavorites(user.uid);
         final favorite = favorites.firstWhere(
           (fav) => fav.destinationId == widget.destination.id,
+          orElse: () => throw Exception('Favorite not found'),
         );
-        await _firestoreService.removeFavorite(favorite.id);
+        await _realtimeService.removeFavorite(favorite.id);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Removed from favorites')),
+        );
       } else {
         // Add to favorites
-        await _firestoreService.addFavorite(
+        await _realtimeService.addFavorite(
           Favorite(
-            id: '', // Will be set by Firestore
+            id: '', // Will be set by Realtime DB
             userId: user.uid,
             destinationId: widget.destination.id,
           ),
+        );
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Added to favorites')),
         );
       }
       _isFavorite = !_isFavorite;
     } catch (e) {
       print('Error toggling favorite: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error: $e')),
+      );
     } finally {
       setState(() => _isLoading = false);
     }

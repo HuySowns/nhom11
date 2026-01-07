@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../services/auth_provider.dart';
-import '../services/firestore_service.dart';
+import '../services/destination_provider.dart';
 import '../models/destination.dart';
 import 'destination_detail_screen.dart';
 
@@ -12,8 +12,7 @@ class HomeScreen extends StatefulWidget {
   _HomeScreenState createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
-  final FirestoreService _firestoreService = FirestoreService();
+class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   List<Destination> _destinations = [];
   List<Destination> _filteredDestinations = [];
   bool _isLoading = true;
@@ -23,91 +22,27 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _loadDestinations();
     _searchController.addListener(_filterDestinations);
   }
 
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      _loadDestinations();
+    }
+  }
+
   Future<void> _loadDestinations() async {
     try {
-      _destinations = await _firestoreService.getDestinations();
-      if (_destinations.isEmpty) {
-        await _addSampleDestinations();
-        _destinations = await _firestoreService.getDestinations();
-      }
+      await context.read<DestinationProvider>().loadDestinations();
+      _destinations = context.read<DestinationProvider>().destinations;
       _filterDestinations();
     } catch (e) {
       print('Error loading destinations: $e');
     } finally {
       setState(() => _isLoading = false);
-    }
-  }
-
-  Future<void> _addSampleDestinations() async {
-    final samples = [
-      Destination(
-        id: '',
-        name: 'Ha Long Bay',
-        location: 'Vietnam',
-        description: 'A UNESCO World Heritage site with stunning limestone karsts and emerald waters.',
-        price: 150.0,
-        rating: 4.8,
-        imageUrls: [
-          'https://images.unsplash.com/photo-1559592413-7cec4d0cae2b?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80',
-          'https://images.unsplash.com/photo-1584464491033-06628f3a6b7b?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80'
-        ],
-      ),
-      Destination(
-        id: '',
-        name: 'Phu Quoc Island',
-        location: 'Vietnam',
-        description: 'Tropical paradise with beautiful beaches, luxury resorts, and vibrant nightlife.',
-        price: 200.0,
-        rating: 4.6,
-        imageUrls: [
-          'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80',
-          'https://images.unsplash.com/photo-1571003123894-1f0594d2b5d9?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80'
-        ],
-      ),
-      Destination(
-        id: '',
-        name: 'Sapa Terraces',
-        location: 'Vietnam',
-        description: 'Breathtaking rice terraces, ethnic villages, and misty mountains.',
-        price: 120.0,
-        rating: 4.7,
-        imageUrls: [
-          'https://images.unsplash.com/photo-1549144511-f099e773c147?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80',
-          'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80'
-        ],
-      ),
-      Destination(
-        id: '',
-        name: 'Ho Chi Minh City',
-        location: 'Vietnam',
-        description: 'Vibrant city with French colonial architecture, bustling markets, and modern skyscrapers.',
-        price: 100.0,
-        rating: 4.5,
-        imageUrls: [
-          'https://images.unsplash.com/photo-1559592413-7cec4d0cae2b?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80',
-          'https://images.unsplash.com/photo-1584464491033-06628f3a6b7b?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80'
-        ],
-      ),
-      Destination(
-        id: '',
-        name: 'Da Nang Marble Mountains',
-        location: 'Vietnam',
-        description: 'Sacred mountains with caves, temples, and panoramic views of the coastline.',
-        price: 80.0,
-        rating: 4.4,
-        imageUrls: [
-          'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80',
-          'https://images.unsplash.com/photo-1571003123894-1f0594d2b5d9?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80'
-        ],
-      ),
-    ];
-
-    for (final dest in samples) {
-      await _firestoreService.addDestination(dest);
     }
   }
 
@@ -192,7 +127,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         Container(
                           decoration: BoxDecoration(
                             gradient: LinearGradient(
-                              colors: [Colors.transparent, Colors.black.withOpacity(0.7)],
+                              colors: [Colors.transparent, Color.fromRGBO(0, 0, 0, 0.7)],
                               begin: Alignment.topCenter,
                               end: Alignment.bottomCenter,
                             ),
@@ -226,7 +161,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         borderRadius: BorderRadius.circular(12),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.teal.withOpacity(0.1),
+                            color: Color.fromRGBO(0, 128, 128, 0.1),
                             blurRadius: 8,
                             offset: const Offset(0, 4),
                           ),
@@ -383,7 +318,7 @@ class _HomeScreenState extends State<HomeScreen> {
       margin: const EdgeInsets.only(right: 16),
       child: Card(
         elevation: 8,
-        shadowColor: Colors.teal.withOpacity(0.3),
+        shadowColor: Color.fromRGBO(0, 128, 128, 0.3),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         child: InkWell(
           onTap: () {
@@ -477,7 +412,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _buildDestinationCard(Destination destination) {
     return Card(
       elevation: 8,
-      shadowColor: Colors.teal.withOpacity(0.2),
+      shadowColor: Color.fromRGBO(0, 128, 128, 0.2),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: InkWell(
         onTap: () {
@@ -587,13 +522,14 @@ class _HomeScreenState extends State<HomeScreen> {
       backgroundColor: Colors.white,
       checkmarkColor: Colors.white,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-      side: BorderSide(color: Colors.teal.withOpacity(0.5)),
+      side: BorderSide(color: Color.fromRGBO(0, 128, 128, 0.5)),
     );
   }
 
   @override
   void dispose() {
     _searchController.dispose();
+    WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
 }
