@@ -4,7 +4,7 @@ import '../services/auth_provider.dart';
 import '../services/realtime_service.dart';
 import '../models/booking.dart';
 import '../models/destination.dart';
-import 'destination_detail_screen.dart';
+import 'booking_detail_screen.dart';
 
 class BookingsScreen extends StatefulWidget {
   const BookingsScreen({super.key});
@@ -49,10 +49,7 @@ class _BookingsScreenState extends State<BookingsScreen> with WidgetsBindingObse
         _destinations = destinations;
         _isLoading = false;
       });
-      
-      print('Loaded ${bookings.length} bookings for user ${user.uid}');
     } catch (e) {
-      print('Error loading bookings: $e');
       setState(() => _isLoading = false);
     }
   }
@@ -66,24 +63,37 @@ class _BookingsScreenState extends State<BookingsScreen> with WidgetsBindingObse
     return Scaffold(
       appBar: AppBar(
         title: const Text('My Bookings'),
+        elevation: 0,
+        backgroundColor: const Color(0xFF00897B),
       ),
       body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
+          ? const Center(
+              child: CircularProgressIndicator(
+                valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF00897B)),
+              ),
+            )
           : _bookings.isEmpty
-              ? const Center(
+              ? Center(
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Icons.book_online, size: 64, color: Colors.grey),
-                      SizedBox(height: 16),
-                      Text('No bookings yet', style: TextStyle(fontSize: 18, color: Colors.grey)),
-                      SizedBox(height: 8),
-                      Text('Start exploring and book your first trip!', style: TextStyle(color: Colors.grey)),
+                      Icon(Icons.book_online, size: 80, color: Colors.grey.shade300),
+                      const SizedBox(height: 16),
+                      Text(
+                        'No bookings yet',
+                        style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600, color: Colors.grey.shade700),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'Start exploring and book your first trip!',
+                        style: TextStyle(color: Colors.grey.shade600, fontSize: 15),
+                      ),
                     ],
                   ),
                 )
               : RefreshIndicator(
                   onRefresh: _loadBookings,
+                  color: const Color(0xFF00897B),
                   child: ListView.builder(
                     padding: const EdgeInsets.all(16),
                     itemCount: _bookings.length,
@@ -93,36 +103,44 @@ class _BookingsScreenState extends State<BookingsScreen> with WidgetsBindingObse
                       if (destination == null) return const SizedBox();
 
                       return Card(
-                        elevation: 4,
+                        elevation: 6,
                         margin: const EdgeInsets.only(bottom: 16),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                         child: InkWell(
                           onTap: () {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (context) => DestinationDetailScreen(destination: destination),
+                                builder: (context) => BookingDetailScreen(
+                                  booking: booking,
+                                  destination: destination,
+                                ),
                               ),
                             );
                           },
                           child: Padding(
-                            padding: const EdgeInsets.all(16),
+                            padding: const EdgeInsets.all(14),
                             child: Row(
                               children: [
                                 ClipRRect(
-                                  borderRadius: BorderRadius.circular(8),
+                                  borderRadius: BorderRadius.circular(12),
                                   child: destination.imageUrls.isNotEmpty
                                       ? Image.network(
                                           destination.imageUrls[0],
-                                          width: 80,
-                                          height: 80,
+                                          width: 90,
+                                          height: 90,
                                           fit: BoxFit.cover,
                                         )
                                       : Container(
-                                          width: 80,
-                                          height: 80,
-                                          color: Colors.grey[300],
-                                          child: const Icon(Icons.image, size: 40),
+                                          width: 90,
+                                          height: 90,
+                                          decoration: BoxDecoration(
+                                            borderRadius: BorderRadius.circular(12),
+                                            gradient: LinearGradient(
+                                              colors: [const Color(0xFF00897B).withValues(alpha: 0.5), const Color(0xFF004D40)],
+                                            ),
+                                          ),
+                                          child: const Icon(Icons.image, size: 40, color: Colors.white),
                                         ),
                                 ),
                                 const SizedBox(width: 16),
@@ -132,34 +150,84 @@ class _BookingsScreenState extends State<BookingsScreen> with WidgetsBindingObse
                                     children: [
                                       Text(
                                         destination.name,
-                                        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                                        style: const TextStyle(
+                                          fontSize: 17,
+                                          fontWeight: FontWeight.w700,
+                                          color: Color(0xFF1A1A1A),
+                                        ),
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
                                       ),
                                       const SizedBox(height: 4),
-                                      Text(
-                                        destination.location,
-                                        style: const TextStyle(color: Colors.grey),
-                                      ),
-                                      const SizedBox(height: 8),
                                       Row(
                                         children: [
-                                          const Icon(Icons.calendar_today, size: 16, color: Colors.blue),
+                                          const Icon(Icons.location_on, size: 14, color: Color(0xFF00897B)),
                                           const SizedBox(width: 4),
-                                          Text(
-                                            booking.date.toLocal().toString().split(' ')[0],
-                                            style: const TextStyle(fontSize: 14),
+                                          Expanded(
+                                            child: Text(
+                                              destination.location,
+                                              style: TextStyle(color: Colors.grey.shade600, fontSize: 13),
+                                              maxLines: 1,
+                                              overflow: TextOverflow.ellipsis,
+                                            ),
                                           ),
-                                          const SizedBox(width: 16),
-                                          const Icon(Icons.people, size: 16, color: Colors.blue),
-                                          const SizedBox(width: 4),
-                                          Text(
-                                            '${booking.numPeople} people',
-                                            style: const TextStyle(fontSize: 14),
+                                        ],
+                                      ),
+                                      const SizedBox(height: 10),
+                                      Row(
+                                        children: [
+                                          Container(
+                                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                                            decoration: BoxDecoration(
+                                              color: const Color(0xFF00897B).withValues(alpha: 0.1),
+                                              borderRadius: BorderRadius.circular(6),
+                                            ),
+                                            child: Row(
+                                              mainAxisSize: MainAxisSize.min,
+                                              children: [
+                                                const Icon(Icons.calendar_today, size: 13, color: Color(0xFF00897B)),
+                                                const SizedBox(width: 4),
+                                                Text(
+                                                  booking.date.toLocal().toString().split(' ')[0],
+                                                  style: const TextStyle(
+                                                    fontSize: 12,
+                                                    fontWeight: FontWeight.w600,
+                                                    color: Color(0xFF00897B),
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                          const SizedBox(width: 8),
+                                          Container(
+                                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                                            decoration: BoxDecoration(
+                                              color: Colors.amber.withValues(alpha: 0.1),
+                                              borderRadius: BorderRadius.circular(6),
+                                            ),
+                                            child: Row(
+                                              mainAxisSize: MainAxisSize.min,
+                                              children: [
+                                                const Icon(Icons.people, size: 13, color: Colors.amber),
+                                                const SizedBox(width: 4),
+                                                Text(
+                                                  '${booking.numPeople}',
+                                                  style: const TextStyle(
+                                                    fontSize: 12,
+                                                    fontWeight: FontWeight.w600,
+                                                    color: Colors.amber,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
                                           ),
                                         ],
                                       ),
                                     ],
                                   ),
                                 ),
+                                const SizedBox(width: 8),
+                                const Icon(Icons.arrow_forward, color: Color(0xFF00897B), size: 20),
                               ],
                             ),
                           ),

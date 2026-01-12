@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'firebase_options.dart';
 import 'services/auth_provider.dart';
 import 'services/destination_provider.dart';
+import 'services/admin_provider.dart';
 import 'screens/login_screen.dart';
 import 'screens/register_screen.dart';
 import 'screens/home_screen.dart';
@@ -12,6 +13,8 @@ import 'screens/add_destination_screen.dart';
 import 'screens/profile_screen.dart';
 import 'screens/bookings_screen.dart';
 import 'screens/main_screen.dart';
+import 'screens/admin_stats_screen.dart';
+import 'screens/admin_management_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -30,46 +33,92 @@ class MainApp extends StatelessWidget {
       providers: [
         ChangeNotifierProvider(create: (_) => AuthProvider()),
         ChangeNotifierProvider(create: (_) => DestinationProvider()),
+        ChangeNotifierProvider(create: (_) => AdminProvider()),
       ],
       child: MaterialApp(
         title: 'Travel App',
         theme: ThemeData(
+          useMaterial3: true,
+          primaryColor: const Color(0xFF00897B),
           primarySwatch: Colors.teal,
-          scaffoldBackgroundColor: const Color(0xFFF5F5F5),
+          scaffoldBackgroundColor: const Color(0xFFFAFAFA),
           appBarTheme: const AppBarTheme(
-            backgroundColor: Colors.teal,
+            backgroundColor: Color(0xFF00897B),
             foregroundColor: Colors.white,
             elevation: 0,
             centerTitle: true,
-            titleTextStyle: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            titleTextStyle: TextStyle(
+              fontSize: 22,
+              fontWeight: FontWeight.w700,
+              letterSpacing: 0.5,
+            ),
           ),
           cardTheme: CardThemeData(
             elevation: 8,
-            shadowColor: Colors.teal.withValues(alpha: 0.2),
+            shadowColor: Colors.teal.withValues(alpha: 0.15),
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            clipBehavior: Clip.antiAlias,
           ),
           inputDecorationTheme: InputDecorationTheme(
             border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(14),
               borderSide: BorderSide.none,
             ),
             filled: true,
             fillColor: Colors.white,
-            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            contentPadding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
+            hintStyle: TextStyle(color: Colors.grey.shade500, fontSize: 15),
+            prefixIconColor: Colors.teal,
           ),
           elevatedButtonTheme: ElevatedButtonThemeData(
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.teal,
+              backgroundColor: const Color(0xFF00897B),
               foregroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 14),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
               elevation: 4,
+              shadowColor: Colors.teal.withValues(alpha: 0.3),
+              textStyle: const TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+                letterSpacing: 0.5,
+              ),
             ),
           ),
           textTheme: const TextTheme(
-            headlineSmall: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.teal),
-            titleMedium: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
-            bodyMedium: TextStyle(fontSize: 16),
+            headlineLarge: TextStyle(
+              fontSize: 32,
+              fontWeight: FontWeight.w800,
+              color: Color(0xFF1A1A1A),
+              letterSpacing: -0.5,
+            ),
+            headlineSmall: TextStyle(
+              fontSize: 22,
+              fontWeight: FontWeight.w700,
+              color: Color(0xFF1A1A1A),
+              letterSpacing: 0.2,
+            ),
+            titleMedium: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.w600,
+              color: Color(0xFF1A1A1A),
+            ),
+            bodyMedium: TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.w400,
+              color: Color(0xFF424242),
+              height: 1.5,
+            ),
+            bodySmall: TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w400,
+              color: Color(0xFF757575),
+            ),
+          ),
+          floatingActionButtonTheme: FloatingActionButtonThemeData(
+            backgroundColor: const Color(0xFF00897B),
+            elevation: 8,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
           ),
         ),
         home: const AuthWrapper(),
@@ -81,6 +130,8 @@ class MainApp extends StatelessWidget {
           '/profile': (context) => const ProfileScreen(),
           '/bookings': (context) => const BookingsScreen(),
           '/main': (context) => const MainScreen(),
+          '/admin_stats': (context) => const AdminStatsScreen(),
+          '/admin_management': (context) => const AdminManagementScreen(),
         },
         onGenerateRoute: (settings) {
           if (settings.name == '/booking') {

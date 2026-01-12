@@ -1,0 +1,105 @@
+{
+  "destinations": {
+    "dest_001": {
+      "name": "Hạ Long Bay",
+      "location": "Quảng Ninh, Việt Nam",
+      "description": "Vịnh Hạ Long là một trong những điểm đến du lịch nổi tiếng nhất của Việt Nam với những hòn đảo đá vôi tuyệt đẹp. Bạn có thể tham gia các tour thuyền du lịch, khám phá những hang động kỳ vĩ và tận hưởng cảnh quan thiên nhiên tuyệt vời.",
+      "price": 150.0,
+      "rating": 4.8,
+      "imageUrls": [
+        "https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=500&h=350&fit=crop",
+        "https://images.unsplash.com/photo-1511632765486-a01980e01a18?w=500&h=350&fit=crop"
+      ]
+    },
+    "dest_002": {
+      "name": "Sapa",
+      "location": "Lào Cai, Việt Nam",
+      "description": "Sapa là một thị trấn nhỏ nằm trên cao nguyên được bao quanh bởi những dãy núi tuyệt đẹp. Đây là điểm đến lý tưởng để khám phá văn hóa địa phương, trekking qua những ruộng bậc thang, và tận hưởng không khí mát mẻ.",
+      "price": 100.0,
+      "rating": 4.6,
+      "imageUrls": [
+        "https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=500&h=350&fit=crop"
+      ]
+    },
+    "dest_003": {
+      "name": "Phủ Quốc",
+      "location": "Kiên Giang, Việt Nam",
+      "description": "Phú Quốc là hòn đảo lớn nhất của Việt Nam với những bãi biển trắng mịn, nước biển xanh trong và các khu resort sang trọng. Đây là nơi hoàn hảo để thư giãn, bơi lội, lặn biển và khám phá cuộc sống dưới nước.",
+      "price": 200.0,
+      "rating": 4.7,
+      "imageUrls": [
+        "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=500&h=350&fit=crop"
+      ]
+    },
+    "dest_004": {
+      "name": "Hội An",
+      "location": "Quảng Nam, Việt Nam",
+      "description": "Hội An là một thành phố cổ kính nằm dọc sông Thu Bồn với những tòa nhà kiến trúc truyền thống được bảo tồn. Bạn có thể dạo bộ qua các phố cổ, mua sắm hàng thủ công, thưởng thức ẩm thực địa phương và đi thuyền trên sông.",
+      "price": 80.0,
+      "rating": 4.5,
+      "imageUrls": [
+        "https://images.unsplash.com/photo-1504681869696-d977211a0250?w=500&h=350&fit=crop"
+      ]
+    },
+    "dest_005": {
+      "name": "Đà Nẵng",
+      "location": "Đà Nẵng, Việt Nam",
+      "description": "Đà Nẵng là một thành phố ven biển xinh đẹp với những bãi biển rộng, các nhà hàng hải sản tươi sống và những điểm tham quan thú vị. Từ đây bạn có thể dễ dàng tiếp cận các địa điểm du lịch khác trong khu vực Trung Bộ.",
+      "price": 120.0,
+      "rating": 4.4,
+      "imageUrls": [
+        "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=500&h=350&fit=crop"
+      ]
+    },
+    "dest_006": {
+      "name": "Cát Bà",
+      "location": "Hải Phòng, Việt Nam",
+      "description": "Cát Bà là một hòn đảo cạnh Hạ Long với những cảnh quan thiên nhiên tuyệt đẹp. Bạn có thể leo núi, khám phá hang động, bơi lội trên biển và tham quan các khu bảo tồn thiên nhiên.",
+      "price": 90.0,
+      "rating": 4.3,
+      "imageUrls": [
+        "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=500&h=350&fit=crop"
+      ]
+    },
+    "dest_007": {
+      "name": "Nha Trang",
+      "location": "Khánh Hòa, Việt Nam",
+      "description": "Nha Trang là một thành phố ven biển với những bãi biển đẹp, nước biển xanh trong và các hoạt động thủy thể phong phú. Bạn có thể lặn biển, tham quan các đảo và thưởng thức các nhà hàng hải sản tươi ngon.",
+      "price": 110.0,
+      "rating": 4.6,
+      "imageUrls": [
+        "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=500&h=350&fit=crop"
+      ]
+    },
+    "dest_008": {
+      "name": "Mũi Né",
+      "location": "Bình Thuận, Việt Nam",
+      "description": "Mũi Né là một thị trấn ven biển nổi tiếng với cồn cát trắng, cồn cát đỏ và những bãi biển đẹp. Đây là nơi lý tưởng cho các hoạt động water sports, tắm biển và tham quan các danh lam thắng cảnh tự nhiên.",
+      "price": 85.0,
+      "rating": 4.5,
+      "imageUrls": [
+        "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=500&h=350&fit=crop"
+      ]
+    },
+    "dest_009": {
+      "name": "Đà Lạt",
+      "location": "Lâm Đồng, Việt Nam",
+      "description": "Đà Lạt là một thành phố núi nổi tiếng với khí hậu mát mẻ, những hoa đẹp và kiến trúc cổ kính. Bạn có thể tham quan hồ nhân tạo, thác nước, vườn hoa và cảm nhận không khí trong lành của cao nguyên.",
+      "price": 95.0,
+      "rating": 4.7,
+      "imageUrls": [
+        "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=500&h=350&fit=crop"
+      ]
+    },
+    "dest_010": {
+      "name": "Sơn Trà",
+      "location": "Đà Nẵng, Việt Nam",
+      "description": "Sơn Trà là một bán đảo xinh đẹp cạnh Đà Nẵng với những bãi biển hoang sơ, rừng rậm và cuộc sống của những loài động vật hiếm. Đây là nơi tuyệt vời để trekking, khám phá thiên nhiên hoang dã và thưởng thức cảnh mặt trời lặn.",
+      "price": 130.0,
+      "rating": 4.8,
+      "imageUrls": [
+        "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=500&h=350&fit=crop"
+      ]
+    }
+  }
+}

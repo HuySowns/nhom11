@@ -57,10 +57,7 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
         _destinations = destinations;
         _isLoading = false;
       });
-      
-      print('Loaded ${bookings.length} bookings for user ${user.uid}');
     } catch (e) {
-      print('Error loading profile data: $e');
       setState(() => _isLoading = false);
     }
   }
@@ -79,87 +76,144 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Profile'),
-        bottom: TabBar(
-          controller: _tabController,
-          tabs: const [
-            Tab(text: 'Info'),
-            Tab(text: 'Favorites & Bookings'),
-          ],
-        ),
+        title: const Text('My Profile'),
+        elevation: 0,
+        backgroundColor: const Color(0xFF00897B),
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
-          : TabBarView(
-              controller: _tabController,
-              children: [
-                _buildInfoTab(user),
-                _buildFavoritesBookingsTab(),
-              ],
-            ),
-    );
-  }
-
-  Widget _buildInfoTab(app_user.AppUser user) {
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          CircleAvatar(
-            radius: 50,
-            backgroundImage: user.avatarUrl != null ? NetworkImage(user.avatarUrl!) : null,
-            child: user.avatarUrl == null ? const Icon(Icons.person, size: 50) : null,
-          ),
-          const SizedBox(height: 16),
-          Text('Name: ${user.name}', style: const TextStyle(fontSize: 18)),
-          const SizedBox(height: 8),
-          Text('Email: ${user.email}', style: const TextStyle(fontSize: 18)),
-          const SizedBox(height: 8),
-          Text('Role: ${user.role}', style: const TextStyle(fontSize: 18)),
-          const SizedBox(height: 20),
-          ElevatedButton(
-            onPressed: () async {
-              await context.read<AuthProvider>().signOut();
-              Navigator.pushReplacementNamed(context, '/login');
-            },
-            child: const Text('Logout'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildFavoritesBookingsTab() {
-    return DefaultTabController(
-      length: 2,
-      child: Column(
-        children: [
-          const TabBar(
-            tabs: [
-              Tab(text: 'Favorites'),
-              Tab(text: 'Bookings'),
-            ],
-          ),
-          Expanded(
-            child: RefreshIndicator(
-              onRefresh: _loadData,
-              child: TabBarView(
+          : SingleChildScrollView(
+              child: Column(
                 children: [
-                  _buildFavoritesList(),
-                  _buildBookingsList(),
+                  _buildProfileHeader(user),
+                  Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: DefaultTabController(
+                      length: 2,
+                      child: Column(
+                        children: [
+                          TabBar(
+                            tabs: const [
+                              Tab(text: 'Bookings', icon: Icon(Icons.book_online)),
+                              Tab(text: 'Favorites', icon: Icon(Icons.favorite)),
+                            ],
+                            labelColor: const Color(0xFF00897B),
+                            unselectedLabelColor: Colors.grey,
+                            indicatorColor: const Color(0xFF00897B),
+                            indicatorWeight: 3,
+                          ),
+                          SizedBox(
+                            height: 400,
+                            child: TabBarView(
+                              children: [
+                                _buildBookingsList(),
+                                _buildFavoritesList(),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
                 ],
               ),
             ),
-          ),
-        ],
+    );
+  }
+
+  Widget _buildProfileHeader(app_user.AppUser user) {
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [const Color(0xFF00897B), const Color(0xFF004D40)],
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+        ),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          children: [
+            CircleAvatar(
+              radius: 60,
+              backgroundColor: Colors.white.withValues(alpha: 0.3),
+              backgroundImage: user.avatarUrl != null ? NetworkImage(user.avatarUrl!) : null,
+              child: user.avatarUrl == null
+                  ? const Icon(Icons.person, size: 60, color: Colors.white)
+                  : null,
+            ),
+            const SizedBox(height: 16),
+            Text(
+              user.name,
+              style: const TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.w800,
+                color: Colors.white,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              user.email,
+              style: TextStyle(
+                fontSize: 14,
+                color: Colors.white.withValues(alpha: 0.85),
+              ),
+            ),
+            const SizedBox(height: 8),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.2),
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Text(
+                user.role.toUpperCase(),
+                style: const TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700,
+                  color: Colors.white,
+                  letterSpacing: 1,
+                ),
+              ),
+            ),
+            const SizedBox(height: 20),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: () async {
+                  await context.read<AuthProvider>().signOut();
+                  Navigator.pushReplacementNamed(context, '/login');
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.white,
+                  foregroundColor: const Color(0xFF00897B),
+                  elevation: 0,
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                ),
+                child: const Text('Logout', style: TextStyle(fontWeight: FontWeight.w700)),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
 
   Widget _buildFavoritesList() {
     if (_favorites.isEmpty) {
-      return const Center(child: Text('No favorites yet'));
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.favorite_border, size: 64, color: Colors.grey.shade300),
+            const SizedBox(height: 16),
+            Text(
+              'No favorites yet',
+              style: TextStyle(color: Colors.grey.shade600, fontSize: 16),
+            ),
+          ],
+        ),
+      );
     }
 
     return ListView.builder(
@@ -170,13 +224,10 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
         if (destination == null) return const SizedBox();
 
         return Card(
-          margin: const EdgeInsets.all(8.0),
-          child: ListTile(
-            leading: destination.imageUrls.isNotEmpty
-                ? Image.network(destination.imageUrls[0], width: 50, height: 50, fit: BoxFit.cover)
-                : const Icon(Icons.image),
-            title: Text(destination.name),
-            subtitle: Text(destination.location),
+          margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
+          elevation: 4,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+          child: InkWell(
             onTap: () {
               Navigator.push(
                 context,
@@ -185,6 +236,71 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
                 ),
               );
             },
+            child: Padding(
+              padding: const EdgeInsets.all(12),
+              child: Row(
+                children: [
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(10),
+                    child: destination.imageUrls.isNotEmpty
+                        ? Image.network(destination.imageUrls[0], width: 70, height: 70, fit: BoxFit.cover)
+                        : Container(
+                            width: 70,
+                            height: 70,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(10),
+                              gradient: LinearGradient(
+                                colors: [const Color(0xFF00897B).withValues(alpha: 0.5), const Color(0xFF004D40)],
+                              ),
+                            ),
+                            child: const Icon(Icons.image, color: Colors.white),
+                          ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          destination.name,
+                          style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 15),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        const SizedBox(height: 4),
+                        Row(
+                          children: [
+                            const Icon(Icons.location_on, size: 14, color: Color(0xFF00897B)),
+                            const SizedBox(width: 4),
+                            Expanded(
+                              child: Text(
+                                destination.location,
+                                style: TextStyle(color: Colors.grey.shade600, fontSize: 13),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 4),
+                        Row(
+                          children: [
+                            const Icon(Icons.star, size: 14, color: Colors.amber),
+                            const SizedBox(width: 4),
+                            Text(
+                              destination.rating.toString(),
+                              style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  const Icon(Icons.favorite, color: Colors.red, size: 20),
+                ],
+              ),
+            ),
           ),
         );
       },
@@ -193,7 +309,19 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
 
   Widget _buildBookingsList() {
     if (_bookings.isEmpty) {
-      return const Center(child: Text('No bookings yet'));
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.book_online, size: 64, color: Colors.grey.shade300),
+            const SizedBox(height: 16),
+            Text(
+              'No bookings yet',
+              style: TextStyle(color: Colors.grey.shade600, fontSize: 16),
+            ),
+          ],
+        ),
+      );
     }
 
     return ListView.builder(
@@ -204,16 +332,77 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
         if (destination == null) return const SizedBox();
 
         return Card(
-          margin: const EdgeInsets.all(8.0),
-          child: ListTile(
-            leading: destination.imageUrls.isNotEmpty
-                ? Image.network(destination.imageUrls[0], width: 50, height: 50, fit: BoxFit.cover)
-                : const Icon(Icons.image),
-            title: Text(destination.name),
-            subtitle: Text('Date: ${booking.date.toLocal().toString().split(' ')[0]}, People: ${booking.numPeople}'),
+          margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
+          elevation: 4,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+          child: InkWell(
             onTap: () {
-              // Maybe show booking details
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => DestinationDetailScreen(destination: destination),
+                ),
+              );
             },
+            child: Padding(
+              padding: const EdgeInsets.all(12),
+              child: Row(
+                children: [
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(10),
+                    child: destination.imageUrls.isNotEmpty
+                        ? Image.network(destination.imageUrls[0], width: 70, height: 70, fit: BoxFit.cover)
+                        : Container(
+                            width: 70,
+                            height: 70,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(10),
+                              gradient: LinearGradient(
+                                colors: [const Color(0xFF00897B).withValues(alpha: 0.5), const Color(0xFF004D40)],
+                              ),
+                            ),
+                            child: const Icon(Icons.image, color: Colors.white),
+                          ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          destination.name,
+                          style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 15),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          'Booking Date: ${booking.date.toLocal().toString().split(' ')[0]}',
+                          style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
+                        ),
+                        const SizedBox(height: 3),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF00897B).withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          child: Text(
+                            '${booking.numPeople} people',
+                            style: const TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                              color: Color(0xFF00897B),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const Icon(Icons.arrow_forward, color: Color(0xFF00897B), size: 20),
+                ],
+              ),
+            ),
           ),
         );
       },

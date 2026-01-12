@@ -41,7 +41,6 @@ class _AddDestinationScreenState extends State<AddDestinationScreen> {
   }
 
   Future<String?> _uploadToCloudinary(File image) async {
-    print('Uploading to Cloudinary with cloudName: $cloudName, uploadPreset: $uploadPreset');
     try {
       final uri = Uri.parse('https://api.cloudinary.com/v1_1/$cloudName/image/upload');
       final request = http.MultipartRequest('POST', uri)
@@ -53,13 +52,9 @@ class _AddDestinationScreenState extends State<AddDestinationScreen> {
         final responseData = await response.stream.bytesToString();
         final json = jsonDecode(responseData);
         return json['secure_url'];
-      } else {
-        print('Upload failed with status: ${response.statusCode}');
-        final responseBody = await response.stream.bytesToString();
-        print('Response body: $responseBody');
       }
     } catch (e) {
-      print('Upload failed: $e');
+      // Handle upload error silently or show user-friendly message
     }
     return null;
   }

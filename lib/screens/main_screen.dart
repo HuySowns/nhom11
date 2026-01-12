@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../services/auth_provider.dart';
 import 'home_screen.dart';
 import 'bookings_screen.dart';
 import 'profile_screen.dart';
+import 'admin_stats_screen.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -13,11 +16,22 @@ class MainScreen extends StatefulWidget {
 class _MainScreenState extends State<MainScreen> {
   int _selectedIndex = 0;
 
-  static const List<Widget> _screens = [
-    HomeScreen(),
-    BookingsScreen(),
-    ProfileScreen(),
-  ];
+  late final List<Widget> _screens;
+
+  @override
+  void initState() {
+    super.initState();
+    // Build screens list based on user role
+    final authProvider = context.read<AuthProvider>();
+    final isAdmin = authProvider.user?.role == 'admin';
+    
+    _screens = [
+      const HomeScreen(),
+      const BookingsScreen(),
+      const ProfileScreen(),
+      if (isAdmin) const AdminStatsScreen(),
+    ];
+  }
 
   void _onItemTapped(int index) {
     setState(() => _selectedIndex = index);
@@ -25,25 +39,34 @@ class _MainScreenState extends State<MainScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final authProvider = context.watch<AuthProvider>();
+    final isAdmin = authProvider.user?.role == 'admin';
+
     return Scaffold(
       body: _screens[_selectedIndex],
       bottomNavigationBar: BottomNavigationBar(
-        items: const [
-          BottomNavigationBarItem(
+        items: [
+          const BottomNavigationBarItem(
             icon: Icon(Icons.explore),
             activeIcon: Icon(Icons.explore_outlined),
             label: 'Explore',
           ),
-          BottomNavigationBarItem(
+          const BottomNavigationBarItem(
             icon: Icon(Icons.book_online),
             activeIcon: Icon(Icons.book_online_outlined),
             label: 'Bookings',
           ),
-          BottomNavigationBarItem(
+          const BottomNavigationBarItem(
             icon: Icon(Icons.person),
             activeIcon: Icon(Icons.person_outline),
             label: 'Profile',
           ),
+          if (isAdmin)
+            const BottomNavigationBarItem(
+              icon: Icon(Icons.bar_chart),
+              activeIcon: Icon(Icons.bar_chart_outlined),
+              label: 'Statistics',
+            ),
         ],
         currentIndex: _selectedIndex,
         selectedItemColor: Colors.teal,
